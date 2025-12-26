@@ -19,6 +19,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils.dynamic_server_loader import get_loader
 from utils.mcp_installer import MCPInstaller
+from utils.tool_searcher import ToolSearcher
 
 # Initialize FastMCP server
 mcp = FastMCP("mcp-proxy")
@@ -26,6 +27,7 @@ mcp = FastMCP("mcp-proxy")
 # Initialize components
 mcp_installer = MCPInstaller()
 server_loader = get_loader()
+tool_searcher = ToolSearcher(server_loader)
 
 
 @mcp.tool()
@@ -472,6 +474,135 @@ def uninstall_mcp_server(server_name: str, delete_files: bool = False) -> dict:
             return {
                 "success": False,
                 "error": f"Failed to uninstall '{server_name}'"
+            }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+
+# ========== TOOL SEARCH TOOLS ==========
+
+@mcp.tool()
+def search_tools(query: str, max_results: int = 10) -> dict:
+    """
+    Search for tools across all loaded MCP servers using natural language.
+
+    This is the key discovery tool - describe what you want to do and
+    find the right tools without knowing their exact names.
+
+    Args:
+        query: Natural language search query (e.g., "send email", "create user", "get metrics")
+        max_results: Maximum number of tools to return (default: 10)
+
+    Returns:
+        Dictionary with matching tools ranked by relevance
+
+    Examples:
+        search_tools("send email")
+        search_tools("create user account")
+        search_tools("database query")
+        search_tools("file operations", max_results=20)
+
+    Usage Notes:
+        - Searches tool names and descriptions
+        - Works across all loaded servers
+        - Load servers first with load_mcp_server_dynamically()
+        - Use get_tool_info() for detailed info on a specific tool
+    """
+    try:
+        results = tool_searcher.search_tools(query, max_results)
+        return {
+            "success": True,
+            "query": query,
+            "tools": results,
+            "count": len(results),
+            "tip": "Use call_dynamic_server_tool(server, tool, params) to call any of these tools"
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+
+@mcp.tool()
+def list_all_tools() -> dict:
+    """
+    List all tools available from all loaded MCP servers.
+
+    Provides a complete inventory of every tool you can call.
+
+    Returns:
+        Dictionary with all tools organized by server
+
+    Example:
+        list_all_tools()
+        # Returns complete tool inventory
+
+    Usage Notes:
+        - Only shows tools from loaded servers
+        - Load more servers with load_mcp_server_dynamically()
+        - Use search_tools() to find specific tools
+    """
+    try:
+        tools = tool_searcher.list_all_tools()
+        servers = tool_searcher.list_servers()
+
+        return {
+            "success": True,
+            "tools": tools,
+            "count": len(tools),
+            "servers": servers,
+            "server_count": len(servers)
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+
+@mcp.tool()
+def get_tool_info(tool_name: str) -> dict:
+    """
+    Get detailed information about a specific tool.
+
+    Provides the tool's description, parameters, and which server it belongs to.
+
+    Args:
+        tool_name: Name of the tool to look up
+
+    Returns:
+        Dictionary with tool details including schema
+
+    Examples:
+        get_tool_info("hello_world")
+        get_tool_info("send_email")
+
+    Usage Notes:
+        - Returns full parameter schema
+        - Shows which server provides the tool
+        - Use search_tools() first to find tool names
+    """
+    try:
+        info = tool_searcher.get_tool_info(tool_name)
+
+        if info:
+            return {
+                "success": True,
+                "tool": info,
+                "call_with": f"call_dynamic_server_tool('{info.get('server')}', '{tool_name}', {{...params...}})"
+            }
+        else:
+            return {
+                "success": False,
+                "error": f"Tool '{tool_name}' not found",
+                "suggestion": "Use search_tools() or list_all_tools() to find available tools"
             }
 
     except Exception as e:
