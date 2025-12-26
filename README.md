@@ -2,6 +2,75 @@
 
 **Hot-reload MCP servers without restarting Claude Code.**
 
+## One-Click Install
+
+### Cursor
+
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=mcp-proxy&config=eyJjb21tYW5kIjogInB5dGhvbiIsICJhcmdzIjogWyItbSIsICJtY3BfcHJveHkuc2VydmVycy5wcm94eV9zZXJ2ZXIiXSwgImVudiI6IHt9fQ%3D%3D)
+
+### VS Code
+
+[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_MCP_Server-0098FF?style=for-the-badge&logo=visualstudiocode)](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%7B%22name%22%3A%22mcp-proxy%22%2C%22command%22%3A%22python%22%2C%22args%22%3A%5B%22-m%22%2C%22mcp_proxy.servers.proxy_server%22%5D%7D)
+
+### Claude Code
+
+```bash
+# Clone the repo first
+git clone https://github.com/lizTheDeveloper/mcp_proxy.git
+cd mcp_proxy
+pip install -r requirements.txt
+
+# Then add to Claude Code (run from parent directory of mcp_proxy)
+claude mcp add mcp-proxy -- python -m mcp_proxy.servers.proxy_server
+```
+
+<details>
+<summary><strong>Manual Installation</strong></summary>
+
+**Step 1: Clone the repository**
+```bash
+git clone https://github.com/lizTheDeveloper/mcp_proxy.git
+pip install -r mcp_proxy/requirements.txt
+```
+
+**Step 2: Add to your MCP config**
+
+**Claude Code** (`~/.claude.json` or project `.mcp.json`):
+```json
+{
+  "mcpServers": {
+    "mcp-proxy": {
+      "command": "python",
+      "args": ["-m", "mcp_proxy.servers.proxy_server"],
+      "cwd": "/path/to/mcp_proxy",
+      "env": {
+        "PYTHONPATH": "/path/to/parent/of/mcp_proxy"
+      }
+    }
+  }
+}
+```
+
+**Cursor** (`~/.cursor/mcp.json`):
+```json
+{
+  "mcpServers": {
+    "mcp-proxy": {
+      "command": "python",
+      "args": ["-m", "mcp_proxy.servers.proxy_server"],
+      "cwd": "/path/to/mcp_proxy",
+      "env": {
+        "PYTHONPATH": "/path/to/parent/of/mcp_proxy"
+      }
+    }
+  }
+}
+```
+
+**Note**: Replace `/path/to/parent/of/mcp_proxy` with the actual parent directory. For example, if you cloned to `/Users/me/src/mcp_proxy`, use `/Users/me/src`.
+
+</details>
+
 ## Features
 
 - **Hot-Reload**: Load and reload MCP servers without restart
@@ -55,20 +124,26 @@ call_dynamic_server_tool("my-server", "tool_name", {"param": "value"})
 install_and_load_mcp_server("https://github.com/user/mcp-server")
 ```
 
-## Available Tools
+## Available Tools (13 total)
 
 | Tool | Description |
 |------|-------------|
+| **Dynamic Loading** | |
 | `load_mcp_server_dynamically` | Load a server from .mcp.json |
 | `call_dynamic_server_tool` | Call any tool on a loaded server |
 | `get_loaded_servers` | List currently loaded servers |
 | `reload_mcp_server` | Reload a server to pick up changes |
 | `unload_mcp_server` | Stop and unload a server |
 | `list_available_servers` | List all configured servers |
+| **Installation** | |
 | `install_mcp_server_from_git` | Install from git repository |
 | `install_and_load_mcp_server` | Install and load in one step |
 | `list_installed_mcp_servers` | List all installed servers |
 | `uninstall_mcp_server` | Remove a server |
+| **Tool Search** | |
+| `search_tools` | Natural language search across loaded servers |
+| `list_all_tools` | List all tools from all loaded servers |
+| `get_tool_info` | Get detailed info about a specific tool |
 
 ## How It Works
 
