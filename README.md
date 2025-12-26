@@ -31,12 +31,14 @@ Add to your project's `.mcp.json`:
       "args": ["-m", "mcp_proxy.servers.proxy_server"],
       "cwd": "/path/to/mcp_proxy",
       "env": {
-        "PYTHONPATH": "/path/to/mcp_proxy"
+        "PYTHONPATH": "/path/to/parent/of/mcp_proxy"
       }
     }
   }
 }
 ```
+
+**Important**: `PYTHONPATH` should point to the **parent directory** of where you cloned `mcp_proxy`, not the mcp_proxy directory itself. For example, if you cloned to `/Users/me/src/mcp_proxy`, set `PYTHONPATH` to `/Users/me/src`.
 
 ### 3. Use
 
